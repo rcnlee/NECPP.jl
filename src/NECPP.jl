@@ -1,7 +1,7 @@
 module NECPP
 
 export handle_nec
-export nec_create, nec_wire, nec_geometry_complete, nec_gn_card, nec_fr_card, nec_ex_card, 
+export NecContext, nec_create, nec_wire, nec_geometry_complete, nec_gn_card, nec_fr_card, nec_ex_card, 
     nec_rp_card, nec_impedance_real, nec_impedance_imag, nec_delete
 
 using PyCall
