@@ -1,8 +1,10 @@
 module NECPP
 
 export handle_nec
-export NecContext, nec_create, nec_wire, nec_geometry_complete, nec_gn_card, nec_fr_card, nec_ex_card, 
-    nec_rp_card, nec_impedance_real, nec_impedance_imag, nec_delete
+export NecContext, nec_create, nec_wire, nec_geometry_complete, nec_gn_card, nec_fr_card, 
+    nec_ex_card, nec_rp_card, nec_delete
+export nec_impedance_real, nec_impedance_imag, nec_gain 
+export vswr, reflection_coeff
 
 using PyCall
 using RLESUtils, Observers, LogSystems
@@ -21,6 +23,13 @@ function handle_nec(result::Int64)
         println(necpp.nec_error_message())
     end
 end
+
+
+################################################################################
+## Helpers 
+vswr(refl_coeff::Complex) = (1 + abs(refl_coeff)) / (1 - abs(refl_coeff))
+vswr(Z::Complex, Z0::Complex) = vswr(reflection_coeff(Z, Z0))
+reflection_coeff(Z::Complex, Z0::Complex) = (Z - Z0) / (Z + Z0)
 
 ###
 # Categories and functions follow original API docs.
@@ -130,5 +139,13 @@ Impedance: Imaginary part
 """
 nec_impedance_imag(nec::NecContext, freq_index::Int64) = 
     necpp.nec_impedance_imag(nec.obj, freq_index)
+
+
+"""
+Get the gain from a radiation pattern
+"""
+nec_gain(nec::NecContext, freq_index::Int64, theta_index::Int64, phi_index::Int64) =
+    necpp.nec_gain(nec.obj, freq_index, theta_index, phi_index)
+
 
 end # module
