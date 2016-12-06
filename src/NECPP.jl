@@ -8,6 +8,7 @@ export vswr, reflection_coeff
 
 using PyCall
 using RLESUtils, Observers, LogSystems
+import RLESTypes.SymbolTable
 
 @pyimport necpp
 
@@ -16,6 +17,7 @@ include("logdefs.jl")
 type NecContext
     obj::PyObject
     logsys::LogSystem
+    userargs::SymbolTable #backdoor for userargs
 end
 
 function handle_nec(result::Int64)
@@ -42,13 +44,17 @@ Create a nec context
 """
 function nec_create(logsys::LogSystem=logsystem()) 
     @notify_observer(logsys.observer, "cards", ["CE"])
-    NecContext(necpp.nec_create(), logsys)
+    NecContext(necpp.nec_create(), logsys, SymbolTable())
 end
 
 """
 Delete a nec context
 """
-nec_delete(nec::NecContext) = necpp.nec_delete(nec.obj) 
+function nec_delete(nec::NecContext) 
+    necpp.nec_delete(nec.obj) 
+    empty!(nec.logsys.observer)
+    empty!(nec.userargs)
+end
 
 ################################################################################
 ## Antenna geometry
